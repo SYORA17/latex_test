@@ -7,13 +7,13 @@ TEX=platex
 DVIPDF=dvipdfmx
 DIFFDIR=old_version
 .SUFFIXES: .tex .dvi .pdf
-all:$(PDF) 
-	open $(PDF) &
+all:$(PDF)
+	evince $(PDF) &
 $(DVI): $(SRC) $(ALL_SRCS)
-$(PDF): $(DVI) 
+$(PDF): $(DVI)
 .dvi.pdf:
 	$(DVIPDF) $<
-.tex.dvi: 
+.tex.dvi:
 	$(TEX) $<
 	$(TEX) $<
 clean:
