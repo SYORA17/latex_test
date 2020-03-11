@@ -8,7 +8,7 @@ DVIPDF=dvipdfmx
 DIFFDIR=old_version
 .SUFFIXES: .tex .dvi .pdf
 all:$(PDF) 
-	evince $(PDF) &
+	open $(PDF) &
 $(DVI): $(SRC) $(ALL_SRCS)
 $(PDF): $(DVI) 
 .dvi.pdf:
