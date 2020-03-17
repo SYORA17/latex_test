@@ -1,0 +1,145 @@
+\documentclass[twocolumn]{jarticle}
+\title{ベイジアンネットワーク}
+\author{白坂貴規}
+\date{\today}
+\setlength{\topmargin}{-2cm}
+\setlength{\textheight}{250mm}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{amsmath, amssymb, bm}
+
+%表のテンプレ
+%\begin{table}[!htbp]
+%  \begin{center}
+%    \caption{}
+%    \begin{tabular}{ccc} \hline
+%    \end{tabular}
+%    \label{tab:}
+%  \end{center}
+%\end{table}
+
+%図のテンプレ
+%\begin{figure}[!htbp]
+%  \begin{center}
+%    \includegraphics[width=14cm]{パス}
+%    \caption{}
+%    \label{fig:}
+%  \end{center}
+%\end{figure}
+
+\begin{document}
+\maketitle
+
+\section{ベイズ推論の基礎}
+ベイズ推論では学習や予測, モデル選択などを全て確率分布上の計算問題として取り扱う.
+\subsection{確率推論}
+${M}$次元ベクトル${\bm {x} = (x_1, \dots, x_M)^T \in \mathbb{R}^M}}$の実数関数${p(\bm {x})}$が次の条件を満たす時, ${p(\bm {x})}$を{\bf 確率密度関数(probability density function})と呼ぶ.
+\begin{eqnarray}
+  p(\bm {x}) \geq 0
+  \int p(\bm {x}) \, \mathrm{d}{\bm {x}} = 1
+\end{eqnarray}
+また, 各要素が離散値である時, ${p(\bm {x})}$を{\bf 確率質量関数(probability mass function})と呼ぶ. 以降, 確率密度関数や確率質量関数で決められる${\bm {x}}$の分布を{\bf 確率分布 (probabilistic distribution)}あるいは{\bf 確率モデル (probabilistic model)}と呼ぶ.
+ある2つの変数${x}$と${y}$に関する確率分布${p(x, y)}$を{\bf 同時分布(joint distribution)}とよび,
+\begin{equation}
+  p(y) = \int_{}^{} p(x, y) \,\mathrm{d}x
+\end{equation}
+のように一方の変数${x}$を積分により除去する操作を{\bf 周辺化 (marginalization)} とよび, 結果として得られる確率分布${p(y)}$をyの{\bf 周辺分布}と呼ぶ. また, 同時分布${p(x, y)}$において, ${y}$に対して特定の値が決められた時の${x}$の確率分布を{\bf 条件付き分布 (conditional distribution)}とよび, 次のように定義する.
+\begin{equation}
+  p(x|y) = \frac{p(x, y)}{p(y)}
+\end{equation}
+条件付き分布${p(x|y)}$は${x}$の確率分布であり, ${y}$はこの分布の特性を決めるパラメータのようなものであると解釈できる.
+\begin{equation}
+  \int_{}^{} p(x|y) \,\mathrm{d}x = \frac{\int_{}^{} p(x, y) \,\mathrm{d}x}{p(y)} = \frac{p(y)}{p(y)} = 1
+\end{equation}
+であり, ${p(x, y)}$と${p(y)}$が共に非負であることも考慮すれば, 条件付き分布${p(x|y)}$は確率分布の用件を満たす.
+さらに, 同時分布を考える際に重要となるのが{\bf 独立 (independence)}という概念である. 同時分布が
+\begin{equation}
+  p(x, y) = p(x)p(y)
+\end{equation}
+を満たす時, ${x}$と${y}$は独立であるという.
+ある同時分布が与えられた時, そこから興味の対象となる条件付き分布や周辺分布を算出することをここでは{\bf ベイズ推論(Baysian inference)}, あるいは単に{\bf 推論(inference)}と呼ぶ.
+{\bf 期待値(expectation)}は確率分布の特徴を定量的に表すことに使われる. ${\bm {x}}$をベクトルとした時に, 確率分布${p(\bm {x})}$に対して, ある関数${f(\bm {x})}$の期待値${\mathbb{E}_{p(\bm {x})} [f(\bm {x})]}$は次のように計算される.
+\begin{equation}
+  \mathbb{E}_{p(\bm {x})} [f(\bm {x})] = \int_{}^{} f(\bm {x}p(\bm {x})) \,\mathrm{d}{\bm x}
+\end{equation}
+2つの確率分布${p(\bm {x})}$及び${q(\bm {x})}$に対して次のような期待値を{\bf KLダイバージェンス(Kullback-Leibler divergence)}と呼ぶ.
+\begin{eqnarray}
+  D_{KL}[q(\bm {x})][p(\bm {x})] &=& - \int_{}^{} q(\bm {x}) \ln \frac{p(\bm {x})}{q(\bm {x})}  \,\mathrm{d}{\bm {x}} \\
+  &=& \mathbb{E}_{q(\bm {x})[\ln q(\bm {x})]} - \mathbb{E}_{q(\bm {x})}[\ln p(\bm {x})]
+\end{eqnarray}
+KLダイバージェンスは任意の確率分布のくみに対して非負であり, 0となるのは2つの分布が完全に一致する場合${p(\bm {x]}) = q(\bm {x})}$に限られる. また, KLダイバージェンすは2つの確率分布の"距離"を表していると解釈されるが, ${p(\bm {x})}$と${q(\bm {x})}$が対称ではない為, 数学的な距離の公理は満たしていない.
+
+\subsection{変数変換}
+既知の確率密度関数に対して変数関数を行うことで新たな確率密度関数を導出することを考える. 全単射の関数${f : \mathbb{R}^M \to \mathbb{R}^M}$によって変数を${\bm {y} = f(\bm {x})}$のように一対一に変換する操作は, 既知の確率密度関数を${p_{x}(\bm {x})}$とすれば, 変換によって得られる${\bm {y}}$の確率密度関数は
+\begin{equation}
+  p_y(\bm {y}) = p_x(g(\bm {y})) \left\lvert \det (J_g)\right\rvert
+\end{equation}
+とかける. ただし, ${J}$は${f}$の逆関数${g}$の{\bf ヤコビ行列(Jacobian matrix)}
+\begin{equation}
+  J_g = \left(
+    \begin{array}{ccc}
+      \frac{\partial x_1}{\partial y_1} & \ldots & \frac{\partial x_1}{\partial y_M} \\
+      \vdots & \ddots & \vdots \\
+      \frac{\partial x_M}{\partial y_1} & \ldots & \frac{\partial x_M}{\partial y_M}
+    \end{array}
+  \right)
+\end{equation}
+であり, ${\det (J_g)}$は${J_g}$の行列式である.
+
+\subsection{グラフィカルモデル}
+{\bf グラフィカルモデル(graohical model)}は, 確率モデルに存在する複数の変換の関係性をノードと矢印を使って表現する記法である. 例として, 次のようにあるパラメータ${\theta }$に依存して${N}$個の変数${\bm {X} = {x_1, \ldots, x_N}}$が発生するような確率モデルを考える. グラフィカルモデルは次図のようになる.
+%\begin{figure}[!htbp]
+%  \begin{center}
+%    \includegraphics[width=14cm]{パス}
+%    \caption{}
+%    \label{fig:}
+%  \end{center}
+%\end{figure}
+\begin{equation}
+  p(\bm {X}, \theta) = p(\theta)p(\bm {X}|\theta) = p(\theta)\prod_{n=1}^N p(x_n|\theta)
+\end{equation}
+なお, 上式における${p(\bm {X}|\theta)}$を{\bf 尤度関数(likelihood function)}, ${p(\theta)}$をパラメータ${\theta}$の{\bf 事前分布}と呼ぶ.
+\subsection{指数分布族}
+ガウス分布やディクレ分布など, ベイズ推論で用いられる多くの実用的な確率分布は, {\bf 指数分布族 (exponential family)}と呼ばれるある形式をもつクラスに属する. その前に, 代表的な確率分布をいくつか紹介する.
+一次元の{\bf ガウス分布 (Gaussian distribution)}または{\bf 正規分布 (normal distribution)}は次のような${x \in \mathbb{R}}$の確率密度関数をもつ分布である.
+\begin{equation}
+  \mathcal{N} (x|\mu, \sigma^2) = \frac{1}{\sqrt{2\pi \sigma ^2}} \exp (- \frac{(x - \mu)^2}{2\sigma^2})
+\end{equation}
+${\mu \in \mathbb{R}}$は平均パラメータで, ${\sigma^2 > 0}$は分散パラメータである. ガウス分布は次のように ${M}$次元の多変量に拡張される.
+\begin{equation}
+  \mathcal{N} (\bm {x|\mu, \sum }) = \frac{1}{\sqrt{(2\pi)^D \left\lvert \sum\right\rvert }} \exp \left(- \frac{1}{2} (\bm {x - \mu})^T \sum^{-1} (\bm {x - \mu}) \right)
+\end{equation}
+ここで, ${\bm {\mu} \in \mathbb{R}^M}$はM次元の平均パラメータで, ${\sum}$はサイズが${M \times M}$の{\bf 共分散行列 (covariance matrix)}である. 1次元ガウス分布の分散が正であったように, 共分散行列${\sum}$は{\bf 正定値行列 (positive definite matrix)}である必要がある.
+{\bf ベルヌーイ分布 (Bernouli distribution)}はいわゆるコイン投げの分布である. 2値をとる変数${x \in \left\{0, 1\right\}}$を生成するための確率分布で, 単一のパラメータ${\mu \in \(0, 1\)}$によって分布の性質が決まる. 確率質量関数は
+\begin{equation}
+  \Bern (x|\mu) = \mu^x(1 - \mu)^{1-x}
+\end{equation}
+と定義される.
+{\bf カテゴリ分布 (categorical distribution)}は, ベルヌーイ分布を任意の${D}$値をとるように拡張したもので, ${\bm {s} \in \left\{0, 1\right\}^D}$かつ, 各要素${s_d}$が${\sum_{d=1}^D s_d = 1}$となるような確率変数${\bm {s}}$を生成する分布である.
+\begin{equation}
+  \Cat (\bm {s} | \bm {\pi}) = \prod_{d=1}^D \pi{s_d}
+\end{equation}
+ここで, ${\bm {\pi} = (\pi_1, \ldots, \pi_D)^T}$は分布を決める${D}$次元のパラメータで, ${\pi_d \in (0, 1)}$かつ${\sum_{d=1}^D \pi_d = 1}$を満たすように設定する必要がある. {\bf ガンマ分布 (gamma distribution)}は正の実数${\lambda > 0}$を生成してくれるような確率分布で, 次のように定義される.
+\begin{eqnarray}
+  Gam(\lambda|a, b) &=& C_G(a, b)\lambda^{a-1}e^{-b\lambda} \\
+  C_G (a, b) &=& \frac{{b^a}}{\Gamma (a)}
+\end{eqnarray}
+パラメータ${a, b}$h共に正の実数値として与える必要がある. ${\Gamma(\cdot )}$は{\bf ガンマ関数 (gamma function)}で
+\begin{equation}
+  \Gamma (x) = \int_{}^{} t^{x-1}e^{-t} \,\mathrm{d}t
+\end{equation}
+で定義される. また,
+\begin{equation}
+  \Gamma (x + 1) = x\Gamma(x)
+\end{equation}
+という性質をもつ.
+
+\subsection{}
+
+\section{自然言語と単語の表現}
+\begin{thebibliography}{9}
+  \bibitem{教科書} 斎藤康穀. ゼロから作るDeep Learning 2. p57-129
+  \bibitem{Qiita} 【機械学習】誤差逆伝播法による速度改善（その2）. https://qiita.com/m-hayashi\\/items/fa4749f8080e542787d2
+  \bibitem{Qiita} 【機械学習 誤差逆伝播法】word2vecメモ (1) https://qiita.com/sand/items/85ea76f9c26aabb849e7
+  \bibitem{論文} Improving Distributional Similarity with Lossons Learned from Word Embeddings https://www.aclweb.org/anthology/Q15-1016/
+\end{thebibliography}
+\end{document}
