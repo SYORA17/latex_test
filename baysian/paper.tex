@@ -275,7 +275,72 @@ ELBOの設計の仕方はいくつかあり, モデルや目的に応じて使�
 \begin{equation}
   \bm {g} = \nabla_{\bm {W}}f(\bm {x_\ast ; W})|_{\bm {W = W_{MAP}}}
 \end{equation}
-この近似を用いれば, 予測分布の計算にNN特有の非線形関数がなくなるので, 解析的に計算することが可能になる.
+この近似を用いれば, 予測分布の計算にNN特有の非線形関数がなくなるので, 解析的に計算することが可能になる. したがって, 求めたい予測分布の近似は,
+\begin{eqnarray}
+  p(y_\ast|\bm {x_\ast, Y, X}) &\thickapprox& \int_{}^{} p(y_\ast|\bm {x_\ast, W}})q(\bm {W}) \,\mathrm{d}{\bm {W}} \nonumber \\
+  &\thickapprox& \int_{}^{} \mathcal{N} (y_\ast | f(\bm {x_\ast; W_{MAP}})) + \bm {g^T (W - W_{MAP}, \sigma_y^2) \nonumber \\
+  && \mathcal{N} (\bm {W|W_{MAP}, \{ \Lambda (\bm {W_{MAP}})\}^{-1}})} \,\mathrm{d}{\bm W} \nonumber \\
+  &=& \mathcal{N} (y_\ast|f(\bm {x_\ast; W_{MAP}}), \sigma^2 (\bm {x_\ast}))
+\end{eqnarray}
+と計算できる. ただし,
+\begin{equation}
+  \sigma^2(\bm {x_\ast}) = \sigma_y^2 + \bm {g^T + \{\Lambda (W_{MAP})^{-1}\}g}
+\end{equation}
+である.
+
+\subsection{重みパラメータの推論}
+BNNへの正規化されていない事後分布を利用すると対応するポテンシャルエネルギーは
+\begin{equation}
+  \mathcal{U}(\bm {W}) = - \{\ln p(\bm {Y|X, W}) + \ln p (\bm {W})\}
+\end{equation}
+となる. リープフロッグ法を使うためにはポテンシャルエネルギーの微分が必要になるが, 正則化項をもつ基本的なNNのコスト関数の微分と等価であるから, 誤差逆伝播による勾配計算が利用できる.
+
+\subsection{ハイパーパラメータの推論}
+重みパラメータ${\bm {W}}$の事前分布を支配する${\sigma_w^2}$や観測モデルのノイズパラメータ${\sigma_y^2}$はハイパーパラメータとして扱われ, 通常は学習を実行する前に適切なものを固定値として与えておく必要がある. これらのハイパーパラメータはデータの大まかな"スケール感"を反映していると考えられるが, もし直観的に値を指定するのが困難である場合や, 学習データに対して当てはまりの良い学習結果を得たい場合は, ハイパーパラメータに対しても事前分布を設定することによって, サンプリングの枠組みの中で重みパラメータ${\bm {W}}$と同時に推論することもできる.
+ハイパーパラメータも同時推論するために, これらに事前分布を与える. パラメータ${\bm {W}}$は分散${\sigma_w^2}$をもつガウス分布にしたがって決定される. 表記を簡単にするため, 精度パラメータ${\gamma_w = \sigma_w^{-2}}$を導入し, 事前分布として,
+\begin{equation}
+  p(\gamma_w) = \Gam (\gamma_w | a_w, b_w)
+\end{equation}
+を考える. ここで, ${a_w > 0, b_w > 0}$は固定値として与える. 観測ノイズに対する精度パラメータ${\gamma_y = \sigma_y^{-2}}$の事前分布も同様にして
+\begin{equation}
+  p(\gamma _y) = \Gam (\gamma_y|a_y, b_y)
+\end{equation}
+と設定する. ただし, ${a_y > 0, b_y > 0}$である.
+これらの精度パラメータの事前分布を導入した場合のモデルを改めて書き下すと
+\begin{eqnarray}
+  p(\bm {Y, W}, \gamma_w, \gamma_y | \bm {X}) &=& p(\gamma_w)p(\gamma_y)p(\bm {W} | \gamma_w) \nonumber \\
+  && \prod _{n = 1}^{N} p(y_n|\bm {x_n, W}, \gamma_y)
+\end{eqnarray}
+となる. したがって事後分布全体は
+\begin{equation}
+  p(\bm {W}, \gamma_w, \gamma_y | \bm {Y, X})
+\end{equation}
+となる. ここではギブスサンプリングを用いて各確率変数のサンプルを得ることを考える. 各確率変数${\bm {W}, \gamma_w, \gamma_y}$を条件付き確率を用いて別々にサンプリングすることである. ${\gamma_w, \gamma_y}$がサンプルされた値で条件付けされた下での${\bm {W}}$の分布は
+\begin{equation}
+  p(\bm {W|Y, X}, \gamma_w, \gamma_y)
+\end{equation}
+となるが, これはパラメータの事後分布そのものであるため, 通常通りハミルトニアンモンテカルロ法を実行することによって${\bm {W}}$のサンプルを得る. ${\bm {W}, \gamma_y}$が与えられた下での${\gamma_w}$の分布は, ${\gamma_w}$に関わらない部分を無視すると
+\begin{equation}
+  p(\gamma_w| \bm {Y, X, W, \gamma_y}) \varpropto p(\bm {W}|\gamma_w)p(\gamma_w)
+\end{equation}
+とかける. ${p(\bm {W}|\gamma_w)}$がガウス分布であり, 精度${\gamma_w}$の事前分布${p(\gamma_w)}$には共役事前分布であるガンマ分布を用いているので, この条件付き分布もガンマ分布として解析的に以下のようにもとまる.
+\begin{eqnarray}
+  \gamma_w &\backsim & \Gam (\hat{a_w}, \hat{b_w}) \\
+  \hat{a_w} &=& a_w + \frac{K_w}{2} \\
+  \hat{b_w} &=& b_w + \frac{1}{2} \sum_{w \in \bm {W}} w^2
+\end{eqnarray}
+のようにして${\gamma_w}$のサンプルが得られる. ただし, ${K_w}$は重みパラメータ${\bm {W}}$の総数である. 次に, ${\bm {W}, \gamma_w}$が与えらられた下での${\gamma_y}$の分布も
+\begin{equation}
+  p(\gamma_y|\bm {Y, X, W, \gamma_w}) \varpropto p(\gamma_y) \prod_{n=1}^{N} p(y_n|\bm {x_n, W}, \gamma_y)
+\end{equation}
+と計算できる. 観測モデル${p(\bm {Y|X, W, \gamma_y})}$がガウス分布であり, 精度${\gamma_y}$の事前分布${p(\gamma_y)}$には共役なガンマ分布を用いたので, こちらも解析的に分布を計算でき,
+\begin{eqnarray}
+  \gamma_y &=& \Gam (\hat{a_y}, \hat{b_y}) \\
+  \hat {a_y} &=& a_y + \frac{N}{2} \\
+  \hat {b_y} &=& b_y + \frac{1}{2} \sum_{n=1}^{N} \{y_n - f(\bm {x_n;W})\}^2
+\end{eqnarray}
+のようにして${\gamma_y}$のサンプルが得られる. 直観的に上式を解釈すると, ${\gamma_y}$はNNの関数${f(\bm {x;W})}$で表現できない誤差を学習していると言える. ガンマ分布の平均は${\hat {a_w} / \hat {b_w}}$であるため, ${\hat {b_w}}$が大きいほど関数${f(\bm {x;W})}$による${y}$の推定の精度が低く, 観測に対する分散が大きくなるように学習される. なお, ここでは簡単のため共通なハイパーパラメータ${\gamma_w}$が与えられていると仮定したが, ハイパーパラメータを複数のグループに分割して与えることもできる.
+
 
 
 
