@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.0-180226-2.6 (utf8.euc) (TeX Live 2018) (preloaded format=platex 2018.7.6)  20 MAR 2020 09:19
+This is e-pTeX, Version 3.14159265-p3.8.0-180226-2.6 (utf8.euc) (TeX Live 2018) (preloaded format=platex 2018.7.6)  20 MAR 2020 09:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -183,12 +183,12 @@ Overfull \hbox (1.12155pt too wide) in alignment at lines 59--67
  []
 
 
-Overfull \hbox (31.96213pt too wide) in alignment at lines 85--92
+Overfull \hbox (2.54344pt too wide) in alignment at lines 85--93
  [][][] []
  []
 
 
-Overfull \hbox (17.64822pt too wide) detected at line 114
+Overfull \hbox (17.64822pt too wide) detected at line 115
 \OML/cmm/m/it/10 V\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 D[]; G\OT1/cmr/m/n/10 ) = \
 OML/cmm/m/it/10 E[]\OT1/cmr/m/n/10 [[] \OML/cmm/m/it/10 D[]\OT1/cmr/m/n/10 (\OM
 L/cmm/m/it/10 x\OT1/cmr/m/n/10 )] + \OML/cmm/m/it/10 E[]\OT1/cmr/m/n/10 [[](1 \
@@ -198,46 +198,42 @@ OMS/cmsy/m/n/10 ^^@ \OML/cmm/m/it/10 D[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 G\OT1
  []
 
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 117.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 118.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 117.
-File: ./GAN_outline.png Graphic file (type bmp)
-<./GAN_outline.png>
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 118.
 
-Underfull \hbox (badness 10000) in paragraph at lines 140--141
+Underfull \hbox (badness 10000) in paragraph at lines 131--132
 []\OT1/cmr/m/n/10 Generative Ad-ver-sar-ial Nets
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 141--142
+Underfull \hbox (badness 10000) in paragraph at lines 132--133
 []\JY1/mc/m/n/10 巣籠悠輔\OT1/cmr/m/n/10 . \JY1/mc/m/n/10 詳説デ ィ ープラ ー
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 141--142
+Underfull \hbox (badness 10000) in paragraph at lines 132--133
 \JY1/mc/m/n/10 ニング \OT1/cmr/m/n/10 (\JY1/mc/m/n/10 生成モデル編\OT1/cmr/m/n/
 10 ) \JY1/mc/m/n/10 　
  []
 
 
-Overfull \hbox (3.58392pt too wide) in paragraph at lines 141--142
+Overfull \hbox (3.58392pt too wide) in paragraph at lines 132--133
 \OT1/cmr/m/n/10 https://note.com/yusugomori/n/n945f51cabc03 
  []
 
-[2] [3
-
-] (./paper.aux)
+[2] (./paper.aux)
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 1685 strings out of 493281
- 19654 string characters out of 6145042
+ 1682 strings out of 493281
+ 19592 string characters out of 6145042
  100032 words of memory out of 5000000
- 5609 multiletter control sequences out of 15000+600000
+ 5607 multiletter control sequences out of 15000+600000
  22770 words of font info for 88 fonts, out of 8000000 for 9000
  929 hyphenation exceptions out of 8191
  27i,7n,27p,540b,309s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on paper.dvi (3 pages, 13136 bytes).
+Output written on paper.dvi (2 pages, 12884 bytes).
