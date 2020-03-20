@@ -115,7 +115,7 @@ VAEは生成した画像がぼやけてしまうが, これは学習が足りて
 \end{equation}
 と表せ, 生成器は${V(D_\ast, G)}$を最小化する.
 
-\subsection{まとめ}
+\section{まとめ}
 以上をまとめると, GANは以下の識別器の学習と生成器の学習を片方を固定して交互に行うことになる. 識別器の学習は, 生成器${G(\theta;z)}$を固定した上で,
 \begin{equation}
   \max_\theta E_{p_d(x)}[\ln D(\phi; x)] + E_{p(z)}[\ln (1 - D(\phi; G(\theta; z)))]
